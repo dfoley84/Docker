@@ -1,0 +1,12 @@
+FROM mcr.microsoft.com/windows/servercore:ltsc2019
+
+#Installing Choco
+RUN powershell.exe Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+
+# Install JDK 8
+RUN powershell.exe choco install jdk8 -y
+
+#Install Jenkins
+RUN powershell.exe choco upgrade jenkins
+
+#Install Required Plugins --> TO DO
