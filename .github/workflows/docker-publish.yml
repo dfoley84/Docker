@@ -2,7 +2,8 @@ name: Docker Push
 on:
   workflow_dispatch:
 jobs:
-  build:
+ 
+  Publish-Container:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -14,6 +15,24 @@ jobs:
         docker login -u $DOCKER_USER -p $DOCKER_PASSWORD 
     - name: Build the Docker image
       run: docker build . --file powercli/Dockerfile --tag nfoley84/powerclicore:latest
-      
     - name: Docker Push
       run: docker push nfoley84/powerclicore
+      
+  Anchore-Build-Scan:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout the code
+      uses: actions/checkout@v2
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag nfoley84/powerclicore:latest
+    - name: Run the Anchore scan action itself with GitHub Advanced Security code scanning integration enabled
+      uses: anchore/scan-action@main
+      with:
+        image: "nfoley84/powerclicore:latest"
+        acs-report-enable: true
+    - name: Upload Anchore Scan Report
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: results.sarif
+        
+      
