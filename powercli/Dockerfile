@@ -1,4 +1,4 @@
-FROM microsoft/powershell:ubuntu16.04
+FROM mcr.microsoft/powershell:ubuntu-16.04
 
 RUN apt update -y && \
     apt install python3.3 python3-dev gcc libpng-dev g++ build-essential libssl-dev libffi-dev curl wget unzip -y
@@ -31,7 +31,7 @@ WORKDIR /root
 
 SHELL [ "pwsh", "-command" ]
 RUN Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-RUN Install-Module VMware.PowerCLI, SqlServer, ImportExcel -Scope AllUsers
+RUN Install-Module VMware.PowerCLI, VMware.VimAutomation.HorizonView,  SqlServer, ImportExcel -Scope AllUsers
 
 SHELL [ "bash", "-c"]
 
