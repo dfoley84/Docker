@@ -3,4 +3,4 @@ requests-credssp==1.1.1
 pyvmomi==7.0.0
 paramiko==2.7.1
 simplejson==3.17.0
-ansible==2.9.8
+ansible==4.2.0
