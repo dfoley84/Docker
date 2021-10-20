@@ -1,9 +1,6 @@
 name: Docker Push
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,7 +13,7 @@ jobs:
       run: |
         docker login -u $DOCKER_USER -p $DOCKER_PASSWORD 
     - name: Build the Docker image
-      run: docker build . --file powercli/Dockerfile --tag nfoley84/powerclicore:$(date +%s)
+      run: docker build . --file powercli/Dockerfile --tag nfoley84/powerclicore:latest
       
     - name: Docker Push
       run: docker push nfoley84/powerclicore
