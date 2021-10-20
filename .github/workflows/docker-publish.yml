@@ -3,37 +3,26 @@ on:
   workflow_dispatch:
 jobs:
  
-  Publish-Container:
+   snyk:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: docker login
+    - name: Build a Docker image
+      run: docker build . --file powercli/Dockerfile --tag nfoley84/powerclicore:latest
+    - name: Run Snyk to check Docker image for vulnerabilities
+      # Snyk can be used to break the build when it detects vulnerabilities.
+      # In this case we want to upload the issues to GitHub Code Scanning
+      continue-on-error: true
+      uses: snyk/actions/docker@master
       env:
-        DOCKER_USER: ${{secrets.DOCKER_USER}}
-        DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
-      run: |
-        docker login -u $DOCKER_USER -p $DOCKER_PASSWORD 
-    - name: Build the Docker image
-      run: docker build . --file powercli/Dockerfile --tag nfoley84/powerclicore:latest
-    - name: Docker Push
-      run: docker push nfoley84/powerclicore
-      
-  Anchore-Build-Scan:
-    runs-on: ubuntu-latest
-    needs:  Publish-Container
-    steps:
-    - name: Checkout the code
-      uses: actions/checkout@v2
-    - name: Build the Docker image
-      run: docker build . --file powercli/Dockerfile --tag nfoley84/powerclicore:latest
-    - name: Run the Anchore scan action itself with GitHub Advanced Security code scanning integration enabled
-      uses: anchore/scan-action@main
+        # In order to use the Snyk Action you will need to have a Snyk API token.
+        # More details in https://github.com/snyk/actions#getting-your-snyk-token
+        # or you can signup for free at https://snyk.io/login
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
-        image: "nfoley84/powerclicore:latest"
-        acs-report-enable: true
-    - name: Upload Anchore Scan Report
+        image: powercli/Dockerfile
+        args: --file=Dockerfile
+    - name: Upload result to GitHub Code Scanning
       uses: github/codeql-action/upload-sarif@v1
       with:
-        sarif_file: results.sarif
-        
-      
+        sarif_file: snyk.sarif
