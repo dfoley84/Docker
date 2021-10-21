@@ -14,6 +14,8 @@ jobs:
       run: |
         docker login -u $DOCKER_USER -p $DOCKER_PASSWORD 
     - name: Build the Docker image
-      run: docker build . --file powercli/Dockerfile --tag nfoley84/powerclicore:latest
+      run: docker build . --file jnlp-slave/Ansible/Dockerfile --tag nfoley84/jnlp-slave-ansible:latest
     - name: Docker Push
-      run: docker push nfoley84/powerclicore
+      run: docker push nfoley84/jnlp-slave-ansible
+
+
