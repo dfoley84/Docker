@@ -31,7 +31,7 @@ WORKDIR /root
 
 SHELL [ "pwsh", "-command" ]
 RUN Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-RUN Install-Module VMware.PowerCLI, VMware.VimAutomation.HorizonView,  SqlServer, ImportExcel -Scope AllUsers
+RUN Install-Module VMware.PowerCLI, VMware.VimAutomation.HorizonView, PowerNSX, VMware.VimAutomation.Sdk, SqlServer, ImportExcel -Scope AllUsers
 
 SHELL [ "bash", "-c"]
 
