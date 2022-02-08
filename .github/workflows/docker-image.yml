@@ -3,10 +3,19 @@ name: Docker Image CI
 on:
   workflow_dispatch:
 jobs:
-  build:
+ 
+  Publish-Container:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: docker login
+      env:
+        DOCKER_USER: ${{secrets.DOCKER_USER}}
+        DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+      run: |
+        docker login -u $DOCKER_USER -p $DOCKER_PASSWORD 
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag flask:$(date +%s)
+      run: docker build . --tag nfoley84/flask:latest
       working-directory: ./Python:3.8/
+    - name: Docker Push
+      run: docker push nfoley84/flask
