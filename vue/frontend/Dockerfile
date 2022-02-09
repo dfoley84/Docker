@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Add package.json to WORKDIR and install dependencies
 COPY package*.json ./
-RUN npm install
+RUN npm install --production && npm rebuild bcrypt --build-from-source && npm cache clean --force 
 
 # Add source code files to WORKDIR
 COPY . .
