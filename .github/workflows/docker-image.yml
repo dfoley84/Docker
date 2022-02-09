@@ -16,6 +16,6 @@ jobs:
         docker login -u $DOCKER_USER -p $DOCKER_PASSWORD 
     - name: Build the Docker image
       run: docker build . --tag nfoley84/flask:latest
-      working-directory: ./Python:3.8/
+      working-directory: ./flask/
     - name: Docker Push
       run: docker push nfoley84/flask
