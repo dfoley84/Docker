@@ -15,7 +15,7 @@ jobs:
       run: |
         docker login -u $DOCKER_USER -p $DOCKER_PASSWORD 
     - name: Build the Docker image
-      run: docker build . --tag nfoley84/flask:latest
-      working-directory: ./flask/
+      run: docker build . --tag nfoley84/vue:latest
+      working-directory: ./vue/frontend/
     - name: Docker Push
-      run: docker push nfoley84/flask
+      run: docker push nfoley84/vue
