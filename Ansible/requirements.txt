@@ -1,7 +1,7 @@
 pywinrm==0.4.1
 requests-credssp==1.1.1
 pyvmomi==7.0.0
-paramiko==2.7.1
+paramiko==2.10.1
 simplejson==3.17.0
 mysql-connector-python==8.0.23
 Jinja2==2.11.3
