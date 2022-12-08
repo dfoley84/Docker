@@ -1,0 +1,56 @@
+# my global config
+global:
+  scrape_interval: 15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+remote_write:
+  - url: '${remotewrite}'
+    sigv4:
+      region: eu-west-1
+    queue_config:
+      max_samples_per_send: 1000
+      max_shards: 200
+      capacity: 2500
+      
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - alertmanager:9093
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: '${NAME}-Node'
+    tls_config:
+      insecure_skip_verify: true
+    ec2_sd_configs:
+      - region: '${REGION}'
+        profile: '${ROLE}'
+        port: 9100
+        filters:
+        - name: tag:ECSNAME
+          values:
+          - '${ECSCLUSTERNAME}' 
+
+  - job_name: '${NAME}-Docker'
+    tls_config:
+      insecure_skip_verify: true
+    ec2_sd_configs:
+      - region: '${REGION}'
+        profile: '${ROLE}'
+        port: 9200
+        filters:
+        - name: tag:ECSNAME
+          values:
+          - '${ECSCLUSTERNAME}' 
