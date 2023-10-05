@@ -1,0 +1,27 @@
+region: AWSREGION
+metrics:
+ - aws_namespace: AWS/SQS     
+   aws_metric_name: ApproximateAgeOfOldestMessage
+   aws_dimensions: [QueueName]  
+   aws_statistics: [Maximum]  
+                        
+ - aws_namespace: AWS/SQS     
+   aws_metric_name: NumberOfMessagesReceived  
+   aws_dimensions: [QueueName]  
+   aws_statistics: [Sum]      
+                        
+ - aws_namespace: AWS/SQS     
+   aws_metric_name: NumberOfMessagesDeleted
+   aws_dimensions: [QueueName]           
+   aws_statistics: [Sum]      
+                        
+ - aws_namespace: AWS/SQS     
+   aws_metric_name: NumberOfMessagesSent
+   aws_dimensions: [QueueName]                        
+   aws_statistics: [Sum]    
+                        
+ - aws_namespace: AWS/SQS     
+   aws_metric_name: ApproximateNumberOfMessagesVisible
+   aws_dimensions: [QueueName]                        
+   aws_statistics: [Sum]    
+
