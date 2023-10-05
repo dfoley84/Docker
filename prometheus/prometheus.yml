@@ -1,9 +1,9 @@
 # my global config
 global:
-  scrape_interval: 15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
-  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  scrape_interval: 1m # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 1m # Evaluate rules every 15 seconds. The default is every 1 minute.
 remote_write:
-  - url: '${remotewrite}'
+  - url: REMOTE
     sigv4:
       region: eu-west-1
     queue_config:
@@ -17,40 +17,49 @@ alerting:
     - static_configs:
         - targets:
           # - alertmanager:9093
-
-# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
 rule_files:
-  # - "first_rules.yml"
-  # - "second_rules.yml"
-
-# A scrape configuration containing exactly one endpoint to scrape:
-# Here it's Prometheus itself.
 scrape_configs:
-  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
-  - job_name: "prometheus"
+  - job_name: "ZONENAME-prometheus"
     static_configs:
       - targets: ["localhost:9090"]
 
-  - job_name: '${NAME}-Node'
+  - job_name: "ZONENAME-Node"
     tls_config:
       insecure_skip_verify: true
     ec2_sd_configs:
-      - region: '${REGION}'
-        profile: '${ROLE}'
+      - region: AWSREGION
+        profile: AWSROLE
         port: 9100
         filters:
-        - name: tag:ECSNAME
+        - name: tag:ECSClusterName
           values:
-          - '${ECSCLUSTERNAME}' 
-
-  - job_name: '${NAME}-Docker'
+          - <> 
+  
+  - job_name: "ZONENAME-CloudWatch"
     tls_config:
       insecure_skip_verify: true
     ec2_sd_configs:
-      - region: '${REGION}'
-        profile: '${ROLE}'
+      - region: AWSREGION
+        profile: AWSROLE
+        port: 9106
+
+  - job_name: "ZONENAME-Docker"
+    tls_config:
+      insecure_skip_verify: true
+    ec2_sd_configs:
+      - region: AWSREGION
+        profile: AWSROLE
         port: 9200
         filters:
-        - name: tag:ECSNAME
+        - name: tag:ECSClusterName
           values:
-          - '${ECSCLUSTERNAME}' 
+          - <>
+  
+  - job_name: "ZONENAME-Postgres"
+    tls_config:
+      insecure_skip_verify: true
+    ec2_sd_configs:
+      - region: AWSREGION
+        profile: AWSROLE
+        port: 9187
+        
