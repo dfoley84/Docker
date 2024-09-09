@@ -1,0 +1,32 @@
+image: atlassian/default-image:4
+definitions:
+  steps:
+    - step: &Packerbuild
+        name: 'Testing Pipe'
+        oidc: true
+        script:
+          - pipe: docker://nfoley84/packer:1
+            variables:
+              ROLE_ARN:
+              ROLE_SESSION_NAME:
+              PACKER_FILE:
+              ENVIRONMENT: 
+              VPC:
+              SOURCE: 
+              SUBNET: 
+              SECURITYGROUP: 
+              PARAMETERSTORE: 
+              
+            
+pipelines:
+  branches:
+    uat:
+      - stage:
+          name: Deploy to Sandbox
+          deployment: sandbox
+          steps:
+            - step: *Packerbuild
+
+    
+
+        
