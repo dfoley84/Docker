@@ -1,0 +1,3 @@
+boto3==1.34.*
+hvac==1.1.*
+bitbucket-pipes-toolkit==4.*

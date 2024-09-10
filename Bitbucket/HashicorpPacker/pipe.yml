@@ -1,0 +1,15 @@
+name: Packer Build
+image: 
+description: This is a pipe to Build AWS Packer Images
+category: Deployment
+repository:
+vendor:
+  name: HashiCorp
+  website: https://www.packer.io/
+maintainer:
+  name: 
+  website:
+tags:
+    - deployment
+    - bitbucket-pipelines
+
