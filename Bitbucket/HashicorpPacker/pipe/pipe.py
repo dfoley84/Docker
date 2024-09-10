@@ -1,12 +1,16 @@
+#Source Code From Bitbucket Pipe Hashicorp Vault 
 import os
 import subprocess
+import sys 
 import boto3
 import yaml
 from enum import Enum, auto
+
 from bitbucket_pipes_toolkit import Pipe, get_logger
 
 logger = get_logger()
 
+# Define the schema for the pipe
 schema = {
     'AWS_DEFAULT_REGION': {'type': 'string', 'required': True},
     'AWS_ROLE_ARN': {'type': 'string', 'required': True},
@@ -21,7 +25,6 @@ schema = {
 
 
 class PackerBuild(Pipe):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Load AWS and Packer environment variables
@@ -34,7 +37,6 @@ class PackerBuild(Pipe):
         self.aws_subnet_id = os.getenv('AWS_SUBNET_ID')
         self.aws_parameter_store_name = os.getenv('AWS_PARAMETER_STORE_NAME')
         self.packer_source_name = os.getenv('PACKER_SOURCE_NAME')
-       
         self.config = self.get_variable('CONFIG')
 
     def setup_aws_env_credentials(self):
@@ -51,7 +53,7 @@ class PackerBuild(Pipe):
         response = client.assume_role_with_web_identity(
             RoleArn=self.aws_oidc_role,
             RoleSessionName=self.aws_oidc_role_name,
-            WebIdentityToken=web_identity_token  # This should be fetched or passed correctly
+            WebIdentityToken=web_identity_token #Getting the Bitbucket Step OIDC Token
         )
 
         # Set the assumed role credentials into the environment
@@ -59,16 +61,19 @@ class PackerBuild(Pipe):
         os.environ['AWS_SECRET_ACCESS_KEY'] = response['Credentials']['SecretAccessKey']
         os.environ['AWS_SESSION_TOKEN'] = response['Credentials']['SessionToken']
         self.log_info("Set up temporary AWS credentials in the environment")
+
+        #Log Credentials to the console for Testing
         self.log_info(f"AWS_ACCESS_KEY_ID: {os.getenv('AWS_ACCESS_KEY_ID')}")
         self.log_info(f"AWS_SECRET_ACCESS_KEY: {os.getenv('AWS_SECRET_ACCESS_KEY')}")
-        print(f"AWS_SESSION_TOKEN: {os.getenv('AWS_SESSION_TOKEN')}")
+
 
     def run_packer_build(self):
         """Run the Packer build process."""
         self.log_info(f"Running Packer build with source name: {self.packer_source_name}")
 
         # Run packer init .
-        init_command = ["packer", "-v"]
+        self.log_info("Running packer init command")
+        init_command = ["packer", "init", "amazon-ecs.pkr.hcl"] #Testing packer version command
         print(init_command)
         try:
             init_result = subprocess.run(init_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -77,21 +82,21 @@ class PackerBuild(Pipe):
             self.log_error(f"Packer init failed: {e.stderr.decode('utf-8')}")
             raise
 
-        # Run packer build
-        packer_command = [
+        # TO-DO - Run packer build with the provided source name
+        self.log_info("Running packer build command")
+        build_command = [
             "packer", "build",
             "-var", f"env={self.aws_environment}",
             "-var", f"vpcid={self.aws_vpc_id}",
+            "-var", f"source_name={self.packer_source_name}",
             "-var", f"subnetid={self.aws_subnet_id}",
             "-var", f"securitygroupid={self.aws_security_group_id}",
-            "-var", f"parameterstore={self.aws_parameter_store_name}",
-            "-var", f"source_name={self.packer_source_name}",
+            "-var", f"parameterstore={ self.aws_parameter_store_name}",
             "amazon-ecs.pkr.hcl"
         ]
-
         try:
-            result = subprocess.run(packer_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            self.log_info(f"Packer build output: {result.stdout.decode('utf-8')}")
+            build_result = subprocess.run(build_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, capture_output=True, text=True)
+            self.log_info(f"Packer build output: {build_result.stdout.decode('utf-8')}")
         except subprocess.CalledProcessError as e:
             self.log_error(f"Packer build failed: {e.stderr.decode('utf-8')}")
             raise
@@ -102,8 +107,9 @@ class PackerBuild(Pipe):
         self.setup_aws_env_credentials()
         # Execute the Packer build
         self.run_packer_build()
-
-
+        result = subprocess.run(stdout=sys.stdout, stderr=sys.stderr)
+        logger.info(f"Result: {result}")
+        
 if __name__ == '__main__':
     with open('/pipe.yml', 'r') as metadata_file:
         metadata = yaml.safe_load(metadata_file.read())
