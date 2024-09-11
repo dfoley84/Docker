@@ -72,18 +72,7 @@ class PackerBuild(Pipe):
         self.log_info(f"Running Packer build with source name: {self.packer_source_name}")
 
         # Run packer init .
-        self.log_info("Running packer init command")
-        init_command = ["packer", "init", "amazon-ecs.pkr.hcl"] #Testing packer version command
-        print(init_command)
-        try:
-            init_result = subprocess.run(init_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            self.log_info(f"Packer init output: {init_result.stdout.decode('utf-8')}")
-        except subprocess.CalledProcessError as e:
-            self.log_error(f"Packer init failed: {e.stderr.decode('utf-8')}")
-            raise
-
-        # TO-DO - Run packer build with the provided source name
-        self.log_info("Running packer build command")
+        init_command = ["packer", "init", "amazon-ecs.pkr.hcl"] 
         build_command = [
             "packer", "build",
             "-var", f"env={self.aws_environment}",
@@ -94,9 +83,22 @@ class PackerBuild(Pipe):
             "-var", f"parameterstore={ self.aws_parameter_store_name}",
             "amazon-ecs.pkr.hcl"
         ]
+
         try:
-            build_result = subprocess.run(build_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, capture_output=True, text=True)
-            self.log_info(f"Packer build output: {build_result.stdout.decode('utf-8')}")
+            self.log_info("Running packer init command")
+            init_result = subprocess.run(init_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            self.log_info(f"Packer init output: {init_result.stdout.decode('utf-8')}")
+        except subprocess.CalledProcessError as e:
+            self.log_error(f"Packer init failed: {e.stderr.decode('utf-8')}")
+            raise
+        try:
+            self.log_info("Running packer build command")
+            build_result = subprocess.Popen(build_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            for line in build_result.stdout:
+                self.log_info(line.strip())
+            build_result.wait()
+            if build_result.returncode != 0:
+                raise subprocess.CalledProcessError(build_result.returncode, build_command)
         except subprocess.CalledProcessError as e:
             self.log_error(f"Packer build failed: {e.stderr.decode('utf-8')}")
             raise
@@ -107,9 +109,7 @@ class PackerBuild(Pipe):
         self.setup_aws_env_credentials()
         # Execute the Packer build
         self.run_packer_build()
-        result = subprocess.run(stdout=sys.stdout, stderr=sys.stderr)
-        logger.info(f"Result: {result}")
-        
+
 if __name__ == '__main__':
     with open('/pipe.yml', 'r') as metadata_file:
         metadata = yaml.safe_load(metadata_file.read())
