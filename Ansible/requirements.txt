@@ -4,5 +4,5 @@ pyvmomi==7.0.0
 paramiko==2.7.1
 simplejson==3.17.0
 mysql-connector-python==8.0.23
-Jinja2==2.11.3
+Jinja2==3.1.6
 python-csv==0.0.13
